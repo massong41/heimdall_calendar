@@ -1,5 +1,7 @@
 from ics import Calendar
+from pprint import pprint
 import requests
+from dateutil import parser
 import io
 
 class Seance:
@@ -37,22 +39,24 @@ for line in c:
     field, _, data = line.partition(':')
     if field in ('SUMMARY'):
         parsing = True
-        name = data
+        name = data.strip()
     if field in ('DESCRIPTION'):
         parsing = True
         value = data.split('\\n')
         for v in value:
-            if "MIAGE" in v:
-                classGroup = v
-            if "Export" not in v and "MIAGE" not in v and not v:
-                teacher = v
+            tmp = v.strip()
+            if "MIAGE" in tmp:
+                classGroup = tmp
+            if "Export" not in tmp and "MIAGE" not in tmp and len(tmp)>0:
+                teacher = tmp
+            
     if field in ('DTSTART'):
         parsing = True
-        startTime = data
+        startTime = parser.parse(data.strip())
     if field in ('DTEND'):
         parsing = True
         if data != 'VEVENT':
-            endTime = data
+            endTime = parser.parse(data.strip())
     else:
         parsing = False
     if name != None and classGroup != None and startTime != None and endTime != None:
@@ -77,6 +81,6 @@ for sea in listSeance:
     print("name:"+ sea.name)
     print("classGroup:"+ sea.classGroup)
     print("teacher:"+ sea.teacher)
-    print("startTime:"+ sea.startTime)
-    print("endTime:"+ sea.endTime)
+    print("startTime:"+ sea.startTime.ctime())
+    print("endTime:"+ sea.endTime.ctime())
     
