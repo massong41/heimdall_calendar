@@ -13,7 +13,7 @@ class Seance:
     startTime = None
     endTime = None
 
-url = "https://ade.parisnanterre.fr/jsp/custom/modules/plannings/anonymous_cal.jsp?data=8241fc3873200214ee9811c8ff4751dfbd72d825015315fefd3463ac7f4bdbd3f377b612dec2c5fba5147d40716acb137447844b505a2e3c"
+url = "https://ade.parisnanterre.fr/jsp/custom/modules/plannings/anonymous_cal.jsp?data=8241fc3873200214fa9b65393b3db214e0fa50826f0818af6a6aa2a7155eb5caec7f554d6ed7ba1b8a72a25d105159e842f6b661317fa297"
 c = Calendar(requests.get(url).text)
 
 #Boucle qui affiche les donnees filtree du fichier .ics
@@ -91,7 +91,9 @@ classGroups = cursor.fetchall()
  #   print("Id: " + str(row[0]) + "Name: " + row[1])
 #print("")
 
-today = date.today()
+#TODO remettre le bon today
+#today = date.today()
+today = datetime(2020, 4, 27).date()
 for seance in listSeance:
     if today == seance.startTime.date():
         #print("date: "+seance.startTime.ctime()+" teacher: "+seance.teacher)
