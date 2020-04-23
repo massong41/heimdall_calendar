@@ -1,7 +1,8 @@
 from ics import Calendar
 from pprint import pprint
 import requests
-from dateutil import parser
+from datetime import datetime, time
+from dateutil import tz, parser
 import io
 
 class Seance:
@@ -34,6 +35,7 @@ classGroup = None
 teacher = None
 startTime = None
 endTime = None
+default_tzinfo = tz.gettz("Europe/Paris")
 for line in c:
     seance = Seance()
     field, _, data = line.partition(':')
@@ -52,11 +54,13 @@ for line in c:
             
     if field in ('DTSTART'):
         parsing = True
-        startTime = parser.parse(data.strip())
+        tmp = parser.parse(data.strip())
+        startTime = tmp.replace(tzinfo=tmp.tzinfo).astimezone(tz=None)
     if field in ('DTEND'):
         parsing = True
-        if data != 'VEVENT':
-            endTime = parser.parse(data.strip())
+        if 'VEVENT' not in data and 'VCALENDAR' not in data:
+            tmp = parser.parse(data.strip())
+            endTime = tmp.replace(tzinfo=tmp.tzinfo).astimezone(tz=None)
     else:
         parsing = False
     if name != None and classGroup != None and startTime != None and endTime != None:
@@ -83,4 +87,5 @@ for sea in listSeance:
     print("teacher:"+ sea.teacher)
     print("startTime:"+ sea.startTime.ctime())
     print("endTime:"+ sea.endTime.ctime())
+    print("")
     
