@@ -1,9 +1,10 @@
+import psycopg2
+import requests
+import io
 from ics import Calendar
 from pprint import pprint
-import requests
-from datetime import datetime, time
+from datetime import datetime, time, date
 from dateutil import tz, parser
-import io
 
 class Seance:
     name = None
@@ -14,18 +15,6 @@ class Seance:
 
 url = "https://ade.parisnanterre.fr/jsp/custom/modules/plannings/anonymous_cal.jsp?data=8241fc3873200214ee9811c8ff4751dfbd72d825015315fefd3463ac7f4bdbd3f377b612dec2c5fba5147d40716acb137447844b505a2e3c"
 c = Calendar(requests.get(url).text)
-
-#print(c)
-#c.events
-
-#Boucle qui affiche les donnee du fichier .ics
-#i=0
-#for e in c:
-#    e = list(c.timeline)[i] 
-#    "Event '{}' started {}".format(e.name, e.begin.humanize())
-#    print (e)
-#    print("\n")
-#    i=i+1
 
 #Boucle qui affiche les donnees filtree du fichier .ics
 parsing = False
@@ -80,12 +69,51 @@ for line in c:
         startTime = None
         endTime = None
 
+#print("Seance from ics:")
+#for sea in listSeance:
+ #   print(" name: " + sea.name + " classGroup: " + sea.classGroup + " teacher: "+ sea.teacher + " startTime: " + sea.startTime.ctime() + " endTime: " + sea.endTime.ctime())
+#print("")
 
-for sea in listSeance:
-    print("name:"+ sea.name)
-    print("classGroup:"+ sea.classGroup)
-    print("teacher:"+ sea.teacher)
-    print("startTime:"+ sea.startTime.ctime())
-    print("endTime:"+ sea.endTime.ctime())
-    print("")
-    
+#connection à la base postgres    
+connection = psycopg2.connect("host='localhost' port=5432 dbname='projetSI' user='postgres' password='projetSI'")
+cursor = connection.cursor()
+#print("Profs from db")
+cursor.execute("SELECT u.id, u.firstname, u.lastname FROM public.user u WHERE u.id in (SELECT id FROM public.teacher)")
+profs = cursor.fetchall()
+#for row in profs:
+    #print("Id: "+ str(row[0]) + " Firstname: " + row[1] + " LastName: "+row[2])
+#print("")
+
+#print("")
+cursor.execute("SELECT cg.id, cg.name FROM public.class_group cg")
+classGroups = cursor.fetchall()
+#for row in classGroups:
+ #   print("Id: " + str(row[0]) + "Name: " + row[1])
+#print("")
+
+today = date.today()
+for seance in listSeance:
+    if today == seance.startTime.date():
+        #print("date: "+seance.startTime.ctime()+" teacher: "+seance.teacher)
+        for group in classGroups:
+            if group[1] in seance.classGroup:
+                #print("group: "+group[1])
+                for prof in profs:
+                    if prof[1].lower() in seance.teacher.lower() and prof[2].lower() in seance.teacher.lower():
+                        #print("prof: "+prof[1])
+                        maxIdQuery = "select max(id) from public.lesson"
+                        cursor.execute(maxIdQuery)
+                        maxId = cursor.fetchone()
+                        if type(maxId[0]) is int:
+                            id = maxId[0]+1
+                        else:
+                            id = 1
+                        insert = """ INSERT INTO public.lesson (id, class_group_id, teacher_id, date_start, date_end, name) VALUES (%s,%s,%s,%s,%s, %s)"""
+                        params = (id, group[0], prof[0], seance.startTime.isoformat(), seance.endTime.isoformat(), seance.name[:50])
+                        cursor.execute(insert, params)
+                        connection.commit()
+                    #else:
+                     #   print("else prof")
+
+cursor.close()
+connection.close()
