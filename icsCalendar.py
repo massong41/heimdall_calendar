@@ -75,7 +75,7 @@ for line in c:
 #print("")
 
 #connection à la base postgres    
-connection = psycopg2.connect("host='localhost' port=5432 dbname='projetSI' user='postgres' password='projetSI'")
+connection = psycopg2.connect("host='localhost' port=5432 dbname='heimdall_db' user='heimdall' password='heimdall'")
 cursor = connection.cursor()
 #print("Profs from db")
 cursor.execute("SELECT u.id, u.firstname, u.lastname FROM public.user u WHERE u.id in (SELECT id FROM public.teacher)")
