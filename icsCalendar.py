@@ -91,9 +91,8 @@ classGroups = cursor.fetchall()
  #   print("Id: " + str(row[0]) + "Name: " + row[1])
 #print("")
 
-#TODO remettre le bon today
-#today = date.today()
-today = datetime(2020, 4, 27).date()
+
+today = date.today()
 for seance in listSeance:
     if today == seance.startTime.date():
         #print("date: "+seance.startTime.ctime()+" teacher: "+seance.teacher)
