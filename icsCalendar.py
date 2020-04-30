@@ -71,24 +71,24 @@ for line in c:
 
 #print("Seance from ics:")
 #for sea in listSeance:
- #   print(" name: " + sea.name + " classGroup: " + sea.classGroup + " teacher: "+ sea.teacher + " startTime: " + sea.startTime.ctime() + " endTime: " + sea.endTime.ctime())
+   #print(" name: " + sea.name + " classGroup: " + sea.classGroup + " teacher: "+ sea.teacher + " startTime: " + sea.startTime.ctime() + " endTime: " + sea.endTime.ctime())
 #print("")
 
 #connection à la base postgres    
-connection = psycopg2.connect("host='localhost' port=5432 dbname='heimdall_db' user='heimdall' password='heimdall'")
+connection = psycopg2.connect("host='172.17.0.1' port=5432 dbname='heimdall' user='heimdall' password='heimdall'")
 cursor = connection.cursor()
-#print("Profs from db")
+print("Profs from db")
 cursor.execute("SELECT u.id, u.firstname, u.lastname FROM public.user u WHERE u.id in (SELECT id FROM public.teacher)")
 profs = cursor.fetchall()
-#for row in profs:
-    #print("Id: "+ str(row[0]) + " Firstname: " + row[1] + " LastName: "+row[2])
-#print("")
+for row in profs:
+    print("Id: "+ str(row[0]) + " Firstname: " + row[1] + " LastName: "+row[2])
+print("")
 
 #print("")
 cursor.execute("SELECT cg.id, cg.name FROM public.class_group cg")
 classGroups = cursor.fetchall()
 #for row in classGroups:
- #   print("Id: " + str(row[0]) + "Name: " + row[1])
+    #print("Id: " + str(row[0]) + "Name: " + row[1])
 #print("")
 
 
@@ -114,7 +114,7 @@ for seance in listSeance:
                         cursor.execute(insert, params)
                         connection.commit()
                     #else:
-                     #   print("else prof")
+                        #print("else prof")
 
 cursor.close()
 connection.close()
